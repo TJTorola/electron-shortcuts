@@ -22,9 +22,9 @@ import {
 
 export const isRegisteredLocal = <S extends string>(
   accelerator: Accelerator<S>,
-  window: BrowserWindow,
+  webContents: Electron.WebContents,
 ): boolean => {
-  return !!getShortcutLocal(accelerator, window);
+  return !!getShortcutLocal(accelerator, webContents);
 };
 
 export const isRegisteredOnAll = <S extends string>(
@@ -44,7 +44,7 @@ export const isRegisteredGlobal = <S extends string>(
 export const register = <S extends string>(
   accelerator: Accelerator<S>,
   f: () => void,
-  window: BrowserWindow,
+  wc: Electron.WebContents,
   options?: RegisterOptions,
 ): void => {
   // `strict` is false if not specified
@@ -95,24 +95,24 @@ export const register = <S extends string>(
 
   // If there was a previous shortcut registed with the same accelerator
   // on the same window, override it
-  const unregisterPreviousIfNeeded = (w: BrowserWindow) =>
-    isRegisteredLocal(accelerator, w)
-      ? unregister(accelerator, w)
+  const unregisterPreviousIfNeeded = (wc: Electron.WebContents) =>
+    isRegisteredLocal(accelerator, wc)
+      ? unregister(accelerator, wc)
       : constVoid();
 
   // Actual registration process
-  const register = (w: BrowserWindow): void => {
-    unregisterPreviousIfNeeded(w);
+  const register = (wc: Electron.WebContents): void => {
+    unregisterPreviousIfNeeded(wc);
 
     // Keep reference to local shortcut in case we need to
     // unregister it later
-    setShortcutLocal(accelerator, w, handler);
+    setShortcutLocal(accelerator, wc, handler);
 
     // Attach listener to webContents of the window
-    w.webContents.on('before-input-event', handler);
+    wc.on('before-input-event', handler);
   };
 
-  return register(window);
+  return register(wc);
 };
 
 // Register a local shortcut for the given
@@ -126,7 +126,7 @@ export const registerOnAll = <S extends string>(
 
   // Handler to register the shortcut for new windows
   const handler = (_: Event, w: BrowserWindow): void =>
-    register(accelerator, f, w, options);
+    register(accelerator, f, w.webContents, options);
 
   // Register shortcut for new windows
   app.on('browser-window-created', handler);
@@ -135,20 +135,21 @@ export const registerOnAll = <S extends string>(
   // we need to unregister it later
   setShortcutOnAll(accelerator, handler);
 
-  return windows.forEach((win) => register(accelerator, f, win, options));
+  return windows.forEach((win) =>
+    register(accelerator, f, win.webContents, options),
+  );
 };
 
 // Unregister the given shortcut from the given window
 export const unregister = <S extends string>(
   accelerator: Accelerator<S>,
-  window: BrowserWindow,
+  webContents: Electron.WebContents,
 ): void => {
-  const handler = getShortcutLocal(accelerator, window)?.[0];
-  const webContents = getShortcutLocal(accelerator, window)?.[1];
+  const handler = getShortcutLocal(accelerator, webContents)?.[0];
 
   const doUnregister = () => {
     webContents.removeListener('before-input-event', handler);
-    deleteShortcutLocal(accelerator, window);
+    deleteShortcutLocal(accelerator, webContents);
   };
 
   !!webContents ? doUnregister() : constVoid();
@@ -169,7 +170,7 @@ export const unregisterOnAll = <S extends string>(
 
   !!globalHandler ? doUnregister() : constVoid();
 
-  return windows.forEach((win) => unregister(accelerator, win));
+  return windows.forEach((win) => unregister(accelerator, win.webContents));
 };
 
 // Register a global shortcut for the given

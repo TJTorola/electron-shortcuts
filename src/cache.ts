@@ -8,26 +8,23 @@ const localShortcutMap: Record<
 
 export const getShortcutLocal = <S extends string>(
   accelerator: Accelerator<S>,
-  window: BrowserWindow,
+  webContents: Electron.WebContents,
 ): [(_: Event, i: Input) => void, WebContents] =>
-  localShortcutMap[`${accelerator}-${window.id}`];
+  localShortcutMap[`${accelerator}-${webContents.id}`];
 
 export const setShortcutLocal = <S extends string>(
   accelerator: Accelerator<S>,
-  window: BrowserWindow,
+  webContents: Electron.WebContents,
   handler: (_: Event, i: Input) => void,
 ): void => {
-  localShortcutMap[`${accelerator}-${window.id}`] = [
-    handler,
-    window.webContents,
-  ];
+  localShortcutMap[`${accelerator}-${webContents.id}`] = [handler, webContents];
 };
 
 export const deleteShortcutLocal = <S extends string>(
   accelerator: Accelerator<S>,
-  window: BrowserWindow,
+  webContents: Electron.WebContents,
 ): void => {
-  delete localShortcutMap[`${accelerator}-${window.id}`];
+  delete localShortcutMap[`${accelerator}-${webContents.id}`];
 };
 
 const allShortcutMap: Record<string, (_: Event, w: BrowserWindow) => void> = {};

@@ -2,37 +2,21 @@
   "name": "electron-shortcuts",
   "version": "0.4.0",
   "description": "Type Safe Electron Shortcuts",
-  "main": "./dist/src/main/main.js",
-  "types": "./dist/src/main/main.d.ts",
+  "main": "./dist/src/main.js",
+  "types": "./dist/src/main.d.ts",
   "scripts": {
     "build": "tsc",
-    "docs": "typedoc --out docs src/main/main.ts",
-    "docs:publish": "npm run docs && surge --domain https://electron-shortcuts.surge.sh docs/",
-    "test:unit": "npm run build && jest --config jestconfig.json ./src/test/unit",
-    "test:e2e": "npm run build && jest --config jestconfig.json --runInBand ./src/test/e2e",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run test:unit"
+    "prepare": "npm run build"
   },
-  "files": [
-    "/dist/src/main"
-  ],
+  "files": ["/dist/src"],
   "author": "mlrv",
   "license": "MIT",
-  "keywords": [
-    "electron",
-    "typescript",
-    "shortcuts"
-  ],
+  "keywords": ["electron", "typescript", "shortcuts"],
   "devDependencies": {
-    "@types/jest": "^26.0.19",
-    "jest": "^26.6.3",
-    "node-keys-simulator": "^1.0.0",
-    "spectron": "^13.0.0",
-    "ts-jest": "^26.4.4",
-    "typedoc": "^0.20.4",
-    "typescript": "^4.1.0"
+    "electron": "^39",
+    "typescript": "^5"
   },
   "peerDependencies": {
-    "electron": "^11.1.1"
+    "electron": "^39"
   }
 }
